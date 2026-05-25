@@ -1,0 +1,245 @@
+import { Category, Template } from "@/types";
+
+export const categories: Category[] = [
+  {
+    id: "1",
+    name: "文章写作",
+    slug: "writing",
+    icon: "✍️",
+    description: "文章、故事、文案生成",
+    prompt_count: 24,
+  },
+  {
+    id: "2",
+    name: "AI绘图",
+    slug: "ai-drawing",
+    icon: "🎨",
+    description: "AI图像生成提示词",
+    prompt_count: 32,
+  },
+  {
+    id: "3",
+    name: "代码生成",
+    slug: "code-generation",
+    icon: "💻",
+    description: "编程辅助提示词",
+    prompt_count: 18,
+  },
+  {
+    id: "4",
+    name: "营销文案",
+    slug: "marketing",
+    icon: "📢",
+    description: "广告、社交媒体文案",
+    prompt_count: 15,
+  },
+  {
+    id: "5",
+    name: "视频脚本",
+    slug: "video-script",
+    icon: "🎬",
+    description: "短视频、YouTube脚本",
+    prompt_count: 12,
+  },
+  {
+    id: "6",
+    name: "商业分析",
+    slug: "business",
+    icon: "📊",
+    description: "行业分析、竞品研究",
+    prompt_count: 10,
+  },
+];
+
+export const templates: Template[] = [
+  {
+    id: "t1",
+    category_id: "2",
+    name: "AI人像摄影",
+    description: "生成专业人像摄影提示词",
+    target_ai: "midjourney",
+    form_fields: [
+      {
+        name: "subject",
+        type: "text",
+        label: "主体描述",
+        placeholder: "一个年轻女孩，长发飘飘",
+        required: true,
+      },
+      {
+        name: "style",
+        type: "select",
+        label: "风格",
+        options: ["写实", "动漫", "油画", "赛博朋克", "复古"],
+        default: "写实",
+        required: true,
+      },
+      {
+        name: "lighting",
+        type: "select",
+        label: "光线",
+        options: ["自然光", "影棚光", "戏剧光", "黄金时刻"],
+        default: "自然光",
+        required: true,
+      },
+      {
+        name: "aspect_ratio",
+        type: "select",
+        label: "比例",
+        options: ["1:1", "16:9", "9:16", "4:3"],
+        default: "1:1",
+        required: true,
+      },
+      {
+        name: "mood",
+        type: "text",
+        label: "氛围/情绪",
+        placeholder: "温暖、忧郁、神秘...",
+        required: false,
+      },
+    ],
+    system_prompt:
+      "You are a professional Midjourney prompt engineer. Create detailed, optimized prompts for image generation.",
+    user_prompt_template:
+      "{subject}, {style}风格, {lighting}光线, {mood}, 高细节, 8k分辨率, 专业摄影 --ar {aspect_ratio} --v 6",
+    example_output:
+      "一个年轻女孩长发飘飘, 写实风格, 黄金时刻光线, 梦幻而空灵, 高细节, 8k分辨率, 专业摄影 --ar 1:1 --v 6",
+    is_premium: false,
+    usage_count: 1240,
+    like_count: 89,
+    created_at: "2025-01-01",
+  },
+  {
+    id: "t2",
+    category_id: "1",
+    name: "文章写作",
+    description: "生成高质量SEO文章",
+    target_ai: "chatgpt",
+    form_fields: [
+      {
+        name: "topic",
+        type: "text",
+        label: "文章主题",
+        placeholder: "AI如何改变未来教育",
+        required: true,
+      },
+      {
+        name: "tone",
+        type: "select",
+        label: "语气风格",
+        options: ["专业", "轻松", "幽默", "学术", "说服"],
+        default: "专业",
+        required: true,
+      },
+      {
+        name: "length",
+        type: "select",
+        label: "文章长度",
+        options: ["短 (约500字)", "中 (约1000字)", "长 (约2000字)"],
+        default: "中 (约1000字)",
+        required: true,
+      },
+      {
+        name: "keywords",
+        type: "text",
+        label: "SEO关键词（逗号分隔）",
+        placeholder: "AI, 教育, 未来科技",
+        required: false,
+      },
+    ],
+    system_prompt:
+      "You are an expert SEO content writer. Write engaging, well-researched articles optimized for search engines.",
+    user_prompt_template:
+      "写一篇{tone}风格的文章，主题：{topic}，长度：{length}，包含关键词：{keywords}。使用适当的标题和副标题。",
+    example_output:
+      "写一篇专业风格的文章，主题：AI如何改变未来教育，长度：约1000字，包含关键词：AI、教育、未来科技。",
+    is_premium: false,
+    usage_count: 2150,
+    like_count: 156,
+    created_at: "2025-01-01",
+  },
+  {
+    id: "t3",
+    category_id: "3",
+    name: "Python代码生成",
+    description: "生成Python代码片段",
+    target_ai: "chatgpt",
+    form_fields: [
+      {
+        name: "task",
+        type: "text",
+        label: "功能描述",
+        placeholder: "读取CSV文件并生成数据可视化图表",
+        required: true,
+      },
+      {
+        name: "library",
+        type: "select",
+        label: "偏好库",
+        options: ["Pandas", "NumPy", "Matplotlib", "Seaborn", "FastAPI"],
+        default: "Pandas",
+        required: false,
+      },
+      {
+        name: "experience",
+        type: "select",
+        label: "你的经验水平",
+        options: ["入门", "中级", "高级"],
+        default: "中级",
+        required: true,
+      },
+    ],
+    system_prompt:
+      "You are a senior Python developer. Write clean, well-commented code with best practices.",
+    user_prompt_template:
+      "编写Python代码实现：{task}。优先使用{library}库。我的经验水平：{experience}。请为每段代码添加注释说明。",
+    example_output:
+      "编写Python代码读取CSV文件并创建数据可视化图表，使用Pandas和Matplotlib，适合中级开发者，附详细注释。",
+    is_premium: false,
+    usage_count: 1890,
+    like_count: 134,
+    created_at: "2025-01-01",
+  },
+  {
+    id: "t4",
+    category_id: "4",
+    name: "社交媒体文案",
+    description: "生成小红书/Twitter文案",
+    target_ai: "chatgpt",
+    form_fields: [
+      {
+        name: "product",
+        type: "text",
+        label: "产品/服务名称",
+        placeholder: "AI写作助手",
+        required: true,
+      },
+      {
+        name: "platform",
+        type: "select",
+        label: "社交平台",
+        options: ["小红书", "Twitter/X", "LinkedIn", "Instagram", "Facebook"],
+        default: "小红书",
+        required: true,
+      },
+      {
+        name: "angle",
+        type: "select",
+        label: "切入角度",
+        options: ["种草推荐", "痛点解决", "测评对比", "教程分享", "情感共鸣"],
+        default: "种草推荐",
+        required: true,
+      },
+    ],
+    system_prompt:
+      "You are a social media copywriter. Create engaging, viral-ready copy optimized for each platform.",
+    user_prompt_template:
+      "Write a {platform} post about {product} with a {angle} angle. Include relevant emojis and hashtags.",
+    example_output:
+      "Create a Xiaohongshu post about AI Writing Assistant with a recommendation angle, including emojis and hashtags.",
+    is_premium: false,
+    usage_count: 3200,
+    like_count: 210,
+    created_at: "2025-01-01",
+  },
+];
