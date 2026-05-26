@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ClientHeader from "@/components/ClientHeader";
 import Footer from "@/components/Footer";
@@ -9,17 +8,17 @@ import TemplateCard from "@/components/TemplateCard";
 import { templates, categories } from "@/data/templates";
 
 export default function TemplatesPage() {
-  const searchParams = useSearchParams();
-  const categoryId = searchParams.get("category");
-  const [activeCategory, setActiveCategory] = useState(categoryId || "all");
+  const [activeCategory, setActiveCategory] = useState("all");
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    const params = new URLSearchParams(window.location.search);
+    const categoryId = params.get("category");
     if (categoryId) {
       setActiveCategory(categoryId);
     }
-  }, [categoryId]);
+  }, []);
 
   const filteredTemplates =
     activeCategory === "all"

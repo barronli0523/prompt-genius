@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { supabase } from "@/lib/supabase";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+const QWEN_API_KEY = process.env.OPENAI_API_KEY || "";
+const QWEN_API_URL = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1";
+const QWEN_MODEL = "qwen3.6-plus";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +34,7 @@ export async function POST(request: NextRequest) {
     let creditsRemaining = 4;
 
     // If no API key, return template-based result
-    if (!OPENAI_API_KEY) {
+    if (!QWEN_API_KEY) {
       // Save to database if user is logged in
       if (userId) {
         await supabase
@@ -63,15 +65,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Call OpenAI API to enhance the prompt
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    // Call Qwen API to enhance the prompt
+    const response = await fetch(`${QWEN_API_URL}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${QWEN_API_KEY}`,
       },
       body: JSON.stringify({
-        model: target_ai === "claude" ? "gpt-4o-mini" : "gpt-4o-mini",
+        model: QWEN_MODEL,
         messages: [
           { role: "system", content: system_prompt },
           { role: "user", content: finalPrompt },
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error?.message || "OpenAI API error");
+      throw new Error(error.error?.message || "Qwen API error");
     }
 
     const data = await response.json();
@@ -124,7 +126,7 @@ export async function POST(request: NextRequest) {
       prompt: enhancedPrompt,
       credits_used: 1,
       credits_remaining: creditsRemaining,
-      source: "openai",
+      source: "qwen",
     });
   } catch (error) {
     console.error("Generate error:", error);
