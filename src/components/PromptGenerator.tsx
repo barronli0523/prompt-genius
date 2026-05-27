@@ -9,6 +9,7 @@ interface PromptGeneratorProps {
 }
 
 export default function PromptGenerator({ template }: PromptGeneratorProps) {
+  const [cache] = useState<Map<string, { formValues: Record<string, string>; generatedPrompt: string; error: string }>>(new Map());
   const [formValues, setFormValues] = useState<Record<string, string>>(
     template.form_fields.reduce((acc, field) => {
       acc[field.name] = field.default || "";
@@ -20,17 +21,26 @@ export default function PromptGenerator({ template }: PromptGeneratorProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string>("");
 
-  // Clear results when switching templates
   const [prevTemplate, setPrevTemplate] = useState(template.id);
   if (template.id !== prevTemplate) {
-    setGeneratedPrompt("");
-    setError("");
-    setFormValues(
-      template.form_fields.reduce((acc, field) => {
-        acc[field.name] = field.default || "";
-        return acc;
-      }, {} as Record<string, string>)
-    );
+    if (prevTemplate) {
+      cache.set(prevTemplate, { formValues, generatedPrompt, error });
+    }
+    const cached = cache.get(template.id);
+    if (cached) {
+      setFormValues(cached.formValues);
+      setGeneratedPrompt(cached.generatedPrompt);
+      setError(cached.error);
+    } else {
+      setGeneratedPrompt("");
+      setError("");
+      setFormValues(
+        template.form_fields.reduce((acc, field) => {
+          acc[field.name] = field.default || "";
+          return acc;
+        }, {} as Record<string, string>)
+      );
+    }
     setPrevTemplate(template.id);
   }
 
