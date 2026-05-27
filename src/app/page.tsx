@@ -12,13 +12,18 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-primary/5 via-white to-primary/5 py-20">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              一键生成完美
-              <span className="text-primary"> AI提示词</span>
+        <section className="relative py-24 md:py-32 overflow-hidden" style={{
+          backgroundImage: "url('/hero-banner.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-transparent"></div>
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-slate-900">
+              PromptGenius
+              <span className="block text-2xl md:text-3xl font-medium mt-2 text-slate-600">AI提示词生成器</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-lg md:text-xl text-slate-700 max-w-2xl mx-auto mb-8">
               不用学复杂的提示词工程，填写表单即可生成高质量提示词
               <br />
               支持 ChatGPT、Midjourney、Claude 等主流AI工具
@@ -26,18 +31,18 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/generate"
-                className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:opacity-90 transition text-lg"
+                className="bg-cyan-500 text-white px-8 py-3 rounded-full font-medium hover:bg-cyan-600 transition text-lg shadow-lg shadow-cyan-500/30"
               >
                 免费开始生成
               </Link>
               <Link
                 href="/templates"
-                className="bg-white border border-border px-8 py-3 rounded-lg font-medium hover:border-primary transition text-lg"
+                className="bg-white/90 backdrop-blur border border-slate-300 px-8 py-3 rounded-full font-medium hover:border-cyan-500 hover:text-cyan-600 transition text-lg"
               >
                 浏览模板库
               </Link>
             </div>
-            <div className="mt-8 text-sm text-muted-foreground">
+            <div className="mt-8 text-sm text-slate-500">
               ✅ 每日免费3次 &nbsp; ✅ 无需信用卡 &nbsp; ✅ 100+ 专业模板
             </div>
           </div>
