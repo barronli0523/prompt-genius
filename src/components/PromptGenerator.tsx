@@ -179,7 +179,7 @@ export default function PromptGenerator({ template }: PromptGeneratorProps) {
       </div>
 
       {/* Result Section */}
-      <div className="bg-slate-900 text-slate-100 rounded-xl p-6 flex flex-col">
+      <div className="bg-slate-900 text-slate-100 rounded-xl p-6 flex flex-col h-[500px]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold">生成结果</h2>
           {generatedPrompt && (
@@ -202,7 +202,7 @@ export default function PromptGenerator({ template }: PromptGeneratorProps) {
           )}
         </div>
 
-        <div className="flex-1 bg-slate-800 rounded-lg p-4 font-mono text-sm overflow-auto">
+        <div className="flex-1 bg-slate-800 rounded-lg p-4 font-mono text-sm overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 #1e293b' }}>
           {generatedPrompt ? (
             <p className="whitespace-pre-wrap">{generatedPrompt}</p>
           ) : (
