@@ -75,8 +75,8 @@ Rules:
           { role: "system", content: systemPrompt },
           { role: "user", content: `Optimize this prompt: ${prompt}` },
         ],
-        temperature: 0.7,
-        max_tokens: 1500,
+        temperature: 0.5,
+        max_tokens: 800,
       }),
     });
 

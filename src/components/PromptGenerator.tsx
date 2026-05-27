@@ -20,6 +20,20 @@ export default function PromptGenerator({ template }: PromptGeneratorProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string>("");
 
+  // Clear results when switching templates
+  const [prevTemplate, setPrevTemplate] = useState(template.id);
+  if (template.id !== prevTemplate) {
+    setGeneratedPrompt("");
+    setError("");
+    setFormValues(
+      template.form_fields.reduce((acc, field) => {
+        acc[field.name] = field.default || "";
+        return acc;
+      }, {} as Record<string, string>)
+    );
+    setPrevTemplate(template.id);
+  }
+
   const handleInputChange = (name: string, value: string) => {
     setFormValues((prev) => ({ ...prev, [name]: value }));
     setError("");

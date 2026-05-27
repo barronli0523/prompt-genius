@@ -99,9 +99,9 @@ export const templates: Template[] = [
       },
     ],
     system_prompt:
-      "You are a professional Midjourney prompt engineer. Create detailed, optimized prompts for image generation.",
+      "You are an expert prompt engineer specializing in creating highly effective Midjourney image generation prompts. Your task is to craft precise, professional prompts that users can directly use in Midjourney.",
     user_prompt_template:
-      "{subject}, {style}风格, {lighting}光线, {mood}, 高细节, 8k分辨率, 专业摄影 --ar {aspect_ratio} --v 6",
+      "请根据以下要求创建一个专业的 Midjourney 提示词：主体：{subject}，风格：{style}，光线：{lighting}，氛围：{mood}，比例：{aspect_ratio}。输出格式：完整的英文提示词，包含风格、光线、构图、质量参数等，以 --ar {aspect_ratio} --v 6 结尾。",
     example_output:
       "一个年轻女孩长发飘飘, 写实风格, 黄金时刻光线, 梦幻而空灵, 高细节, 8k分辨率, 专业摄影 --ar 1:1 --v 6",
     is_premium: false,
@@ -148,9 +148,9 @@ export const templates: Template[] = [
       },
     ],
     system_prompt:
-      "You are an expert SEO content writer. Write engaging, well-researched articles optimized for search engines.",
+      "You are an expert prompt engineer specializing in creating effective ChatGPT prompts for content writing. Your task is to craft precise, ready-to-use prompts that users can paste into ChatGPT to get high-quality articles.",
     user_prompt_template:
-      "写一篇{tone}风格的文章，主题：{topic}，长度：{length}，包含关键词：{keywords}。使用适当的标题和副标题。",
+      "请创建一个用于生成文章的 ChatGPT 提示词。要求：语气风格：{tone}，文章主题：{topic}，长度约：{length}，包含SEO关键词：{keywords}。输出：一个完整的、可直接复制使用的 ChatGPT 提示词，包含角色设定、写作要求和格式规范。",
     example_output:
       "写一篇专业风格的文章，主题：AI如何改变未来教育，长度：约1000字，包含关键词：AI、教育、未来科技。",
     is_premium: false,
@@ -190,9 +190,9 @@ export const templates: Template[] = [
       },
     ],
     system_prompt:
-      "You are a senior Python developer. Write clean, well-commented code with best practices.",
+      "You are an expert prompt engineer specializing in creating effective coding prompts for AI assistants. Your task is to craft precise, ready-to-use prompts that users can paste into ChatGPT/Claude to get clean, professional code.",
     user_prompt_template:
-      "编写Python代码实现：{task}。优先使用{library}库。我的经验水平：{experience}。请为每段代码添加注释说明。",
+      "请创建一个用于生成 Python 代码的 ChatGPT 提示词。功能需求：{task}，优先使用库：{library}，用户经验水平：{experience}。输出：一个完整的、可直接复制使用的提示词，包含角色设定、代码规范要求和输出格式说明。",
     example_output:
       "编写Python代码读取CSV文件并创建数据可视化图表，使用Pandas和Matplotlib，适合中级开发者，附详细注释。",
     is_premium: false,
@@ -232,9 +232,9 @@ export const templates: Template[] = [
       },
     ],
     system_prompt:
-      "You are a social media copywriter. Create engaging, viral-ready copy optimized for each platform.",
+      "You are an expert prompt engineer specializing in creating social media content prompts. Your task is to craft precise prompts that users can paste into ChatGPT to generate viral social media copy.",
     user_prompt_template:
-      "Write a {platform} post about {product} with a {angle} angle. Include relevant emojis and hashtags.",
+      "请创建一个用于生成社交平台文案的 ChatGPT 提示词。产品/服务：{product}，发布平台：{platform}，切入角度：{angle}。输出：一个完整的提示词，包含角色设定、平台调性要求、文案结构和标签规范。",
     example_output:
       "Create a Xiaohongshu post about AI Writing Assistant with a recommendation angle, including emojis and hashtags.",
     is_premium: false,
@@ -282,9 +282,9 @@ export const templates: Template[] = [
       },
     ],
     system_prompt:
-      "You are a professional short video scriptwriter. Create engaging, hook-driven scripts optimized for TikTok/Douyin.",
+      "You are an expert prompt engineer specializing in creating video script prompts for AI assistants. Your task is to craft precise prompts users can paste into ChatGPT to generate engaging short video scripts.",
     user_prompt_template:
-      "写一个{duration}的{style}风格短视频脚本，主题：{topic}。开头钩子：{hook}。包含画面描述、台词、字幕建议。",
+      "请创建一个用于生成短视频脚本的 ChatGPT 提示词。视频时长：{duration}，风格：{style}，主题：{topic}，开头钩子：{hook}。输出：一个完整的提示词，包含角色设定、脚本结构要求和输出格式规范。",
     example_output:
       "写一个30秒的口播风格短视频脚本，主题：职场新人避坑指南。开头钩子：90%的人都不知道这3个职场潜规则。包含画面描述、台词、字幕建议。",
     is_premium: false,
@@ -324,9 +324,9 @@ export const templates: Template[] = [
       },
     ],
     system_prompt:
-      "You are an experienced YouTube content creator. Write engaging long-form video scripts with strong hooks and CTAs.",
+      "You are an expert prompt engineer specializing in creating YouTube video script prompts. Your task is to craft precise prompts users can paste into ChatGPT to generate professional long-form video scripts.",
     user_prompt_template:
-      "写一个{length}的YouTube视频脚本，主题：{topic}，风格：{tone}。包含开头钩子、内容主体、结尾CTA（订阅/点赞引导）。",
+      "请创建一个用于生成 YouTube 视频脚本的 ChatGPT 提示词。视频时长：{length}，主题：{topic}，语气风格：{tone}。输出：一个完整的提示词，包含角色设定、脚本结构（开头钩子/内容主体/结尾CTA）和输出格式要求。",
     example_output:
       "写一个10分钟的YouTube视频脚本，主题：如何用AI提升10倍工作效率，风格：专业教学。包含开头钩子、内容主体、结尾CTA。",
     is_premium: false,
@@ -367,9 +367,9 @@ export const templates: Template[] = [
       },
     ],
     system_prompt:
-      "You are a professional industry analyst. Write comprehensive industry analysis reports with data insights and trend forecasts.",
+      "You are an expert prompt engineer specializing in creating business analysis prompts. Your task is to craft precise prompts users can paste into ChatGPT to generate professional industry reports.",
     user_prompt_template:
-      "写一份{region}{industry}的行业分析报告，深度：{depth}。包含：行业概况、市场规模、竞争格局、发展趋势、关键机遇与挑战。",
+      "请创建一个用于生成行业分析报告的 ChatGPT 提示词。行业：{industry}，地域范围：{region}，分析深度：{depth}。输出：一个完整的提示词，包含角色设定、报告结构（概况/规模/竞争/趋势/机遇挑战）和输出格式规范。",
     example_output:
       "写一份中国市场新能源汽车行业的行业分析报告，深度：约3000字。包含行业概况、市场规模、竞争格局、发展趋势、关键机遇与挑战。",
     is_premium: false,
@@ -408,9 +408,9 @@ export const templates: Template[] = [
       },
     ],
     system_prompt:
-      "You are a competitive intelligence analyst. Create detailed competitor comparisons with actionable insights.",
+      "You are an expert prompt engineer specializing in creating competitive analysis prompts. Your task is to craft precise prompts users can paste into ChatGPT to generate professional competitor comparisons.",
     user_prompt_template:
-      "分析{my_product}与以下竞品的对比：{competitors}。分析维度：{dimensions}。输出包含功能、定价、优劣势、差异化建议的对比表格。",
+      "请创建一个用于生成竞品分析的 ChatGPT 提示词。我的产品：{my_product}，竞品列表：{competitors}，分析维度：{dimensions}。输出：一个完整的提示词，包含角色设定、分析框架和对比表格输出格式要求。",
     example_output:
       "分析AI写作助手App与Jasper, Copy.ai, Writesonic的对比。分析维度：综合分析。输出包含功能、定价、优劣势、差异化建议的对比表格。",
     is_premium: false,
