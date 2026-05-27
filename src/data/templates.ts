@@ -39,7 +39,7 @@ export const categories: Category[] = [
     slug: "video-script",
     icon: "🎬",
     description: "短视频、YouTube脚本",
-    prompt_count: 12,
+    prompt_count: 2,
   },
   {
     id: "6",
@@ -47,7 +47,7 @@ export const categories: Category[] = [
     slug: "business",
     icon: "📊",
     description: "行业分析、竞品研究",
-    prompt_count: 10,
+    prompt_count: 2,
   },
 ];
 
@@ -241,5 +241,181 @@ export const templates: Template[] = [
     usage_count: 3200,
     like_count: 210,
     created_at: "2025-01-01",
+  },
+  // 视频脚本模板 (category_id: "5")
+  {
+    id: "t5",
+    category_id: "5",
+    name: "抖音短视频脚本",
+    description: "生成15-60秒短视频脚本",
+    target_ai: "chatgpt",
+    form_fields: [
+      {
+        name: "topic",
+        type: "text",
+        label: "视频主题",
+        placeholder: "职场新人避坑指南",
+        required: true,
+      },
+      {
+        name: "duration",
+        type: "select",
+        label: "视频时长",
+        options: ["15秒", "30秒", "60秒"],
+        default: "30秒",
+        required: true,
+      },
+      {
+        name: "style",
+        type: "select",
+        label: "视频风格",
+        options: ["口播", "剧情", "教程", "种草", "搞笑"],
+        default: "口播",
+        required: true,
+      },
+      {
+        name: "hook",
+        type: "text",
+        label: "开头钩子（可选）",
+        placeholder: "90%的人都不知道...",
+        required: false,
+      },
+    ],
+    system_prompt:
+      "You are a professional short video scriptwriter. Create engaging, hook-driven scripts optimized for TikTok/Douyin.",
+    user_prompt_template:
+      "写一个{duration}的{style}风格短视频脚本，主题：{topic}。开头钩子：{hook}。包含画面描述、台词、字幕建议。",
+    example_output:
+      "写一个30秒的口播风格短视频脚本，主题：职场新人避坑指南。开头钩子：90%的人都不知道这3个职场潜规则。包含画面描述、台词、字幕建议。",
+    is_premium: false,
+    usage_count: 2800,
+    like_count: 178,
+    created_at: "2025-01-15",
+  },
+  {
+    id: "t6",
+    category_id: "5",
+    name: "YouTube长视频脚本",
+    description: "生成5-15分钟YouTube视频脚本",
+    target_ai: "chatgpt",
+    form_fields: [
+      {
+        name: "topic",
+        type: "text",
+        label: "视频主题",
+        placeholder: "如何用AI提升10倍工作效率",
+        required: true,
+      },
+      {
+        name: "length",
+        type: "select",
+        label: "视频长度",
+        options: ["5分钟", "10分钟", "15分钟"],
+        default: "10分钟",
+        required: true,
+      },
+      {
+        name: "tone",
+        type: "select",
+        label: "语气风格",
+        options: ["专业教学", "轻松闲聊", "深度分析", "娱乐搞笑"],
+        default: "专业教学",
+        required: true,
+      },
+    ],
+    system_prompt:
+      "You are an experienced YouTube content creator. Write engaging long-form video scripts with strong hooks and CTAs.",
+    user_prompt_template:
+      "写一个{length}的YouTube视频脚本，主题：{topic}，风格：{tone}。包含开头钩子、内容主体、结尾CTA（订阅/点赞引导）。",
+    example_output:
+      "写一个10分钟的YouTube视频脚本，主题：如何用AI提升10倍工作效率，风格：专业教学。包含开头钩子、内容主体、结尾CTA。",
+    is_premium: false,
+    usage_count: 1950,
+    like_count: 142,
+    created_at: "2025-01-15",
+  },
+  // 商业分析模板 (category_id: "6")
+  {
+    id: "t7",
+    category_id: "6",
+    name: "行业分析报告",
+    description: "生成行业趋势分析报告",
+    target_ai: "chatgpt",
+    form_fields: [
+      {
+        name: "industry",
+        type: "text",
+        label: "行业名称",
+        placeholder: "新能源汽车行业",
+        required: true,
+      },
+      {
+        name: "region",
+        type: "select",
+        label: "地域范围",
+        options: ["中国市场", "全球市场", "东南亚市场", "欧美市场"],
+        default: "中国市场",
+        required: true,
+      },
+      {
+        name: "depth",
+        type: "select",
+        label: "分析深度",
+        options: ["概览（约1000字）", "详细（约3000字）", "深度（约5000字）"],
+        default: "详细（约3000字）",
+        required: true,
+      },
+    ],
+    system_prompt:
+      "You are a professional industry analyst. Write comprehensive industry analysis reports with data insights and trend forecasts.",
+    user_prompt_template:
+      "写一份{region}{industry}的行业分析报告，深度：{depth}。包含：行业概况、市场规模、竞争格局、发展趋势、关键机遇与挑战。",
+    example_output:
+      "写一份中国市场新能源汽车行业的行业分析报告，深度：约3000字。包含行业概况、市场规模、竞争格局、发展趋势、关键机遇与挑战。",
+    is_premium: false,
+    usage_count: 1680,
+    like_count: 95,
+    created_at: "2025-01-20",
+  },
+  {
+    id: "t8",
+    category_id: "6",
+    name: "竞品分析",
+    description: "生成竞争对手对比分析",
+    target_ai: "chatgpt",
+    form_fields: [
+      {
+        name: "my_product",
+        type: "text",
+        label: "我的产品/服务",
+        placeholder: "AI写作助手App",
+        required: true,
+      },
+      {
+        name: "competitors",
+        type: "text",
+        label: "竞品名称（逗号分隔）",
+        placeholder: "Jasper, Copy.ai, Writesonic",
+        required: true,
+      },
+      {
+        name: "dimensions",
+        type: "select",
+        label: "分析维度",
+        options: ["功能对比", "价格对比", "用户体验", "市场定位", "综合分析"],
+        default: "综合分析",
+        required: true,
+      },
+    ],
+    system_prompt:
+      "You are a competitive intelligence analyst. Create detailed competitor comparisons with actionable insights.",
+    user_prompt_template:
+      "分析{my_product}与以下竞品的对比：{competitors}。分析维度：{dimensions}。输出包含功能、定价、优劣势、差异化建议的对比表格。",
+    example_output:
+      "分析AI写作助手App与Jasper, Copy.ai, Writesonic的对比。分析维度：综合分析。输出包含功能、定价、优劣势、差异化建议的对比表格。",
+    is_premium: false,
+    usage_count: 1420,
+    like_count: 87,
+    created_at: "2025-01-20",
   },
 ];
