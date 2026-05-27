@@ -9,8 +9,8 @@ interface Props {
   params: Promise<{ templateId: string }>;
 }
 
-export default function TemplateDetailPage({ params }: Props) {
-  const resolvedParams = typeof params === 'object' && 'templateId' in params ? params as { templateId: string } : { templateId: '' };
+export default async function TemplateDetailPage({ params }: Props) {
+  const resolvedParams = await params;
   const template = templates.find((t) => t.id === resolvedParams.templateId);
 
   if (!template) {
