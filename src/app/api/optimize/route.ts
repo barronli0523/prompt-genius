@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { supabase } from "@/lib/supabase";
 
+export const runtime = "edge";
+
 const QWEN_API_KEY = process.env.OPENAI_API_KEY || "";
 const QWEN_API_URL = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1";
 const QWEN_MODEL = "qwen3.6-plus";

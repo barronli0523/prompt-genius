@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import PromptGenerator from "@/components/PromptGenerator";
 import { templates } from "@/data/templates";
 
+export const runtime = "edge";
+
 interface Props {
   params: Promise<{ templateId: string }>;
 }
