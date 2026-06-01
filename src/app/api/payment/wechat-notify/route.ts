@@ -2,6 +2,7 @@ export const runtime = "edge";
 
 import { supabaseAdmin } from "@/lib/supabase";
 import { NextResponse } from "next/server";
+import { clerkClient } from "@clerk/nextjs/server";
 
 const successXml = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 const failXml = "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[Error]]></return_msg></xml>";
@@ -35,14 +36,36 @@ async function verifyWechatSignature(params: URLSearchParams): Promise<boolean> 
 }
 
 /**
+ * Sync subscription status to Clerk publicMetadata so the frontend can react.
+ */
+async function syncClerkMetadata(
+  clerkId: string,
+  planType: string,
+  expiry: Date,
+): Promise<void> {
+  try {
+    const client = await clerkClient();
+    await client.users.updateUserMetadata(clerkId, {
+      publicMetadata: {
+        subscription_tier: planType,
+        subscription_expiry: expiry.toISOString(),
+      },
+    });
+  } catch (e) {
+    console.error("Failed to sync Clerk metadata:", e);
+  }
+}
+
+/**
  * Create or extend a subscription record.
  * If an active (non-expired) subscription exists, extends its end date.
  * Otherwise creates a new subscription record.
+ * Returns the new period_end date.
  */
 async function createOrUpdateSubscription(
   clerkId: string,
   planType: string,
-): Promise<void> {
+): Promise<Date> {
   const now = new Date();
   const periodEnd = new Date(now);
   if (planType === "pro") {
@@ -73,6 +96,7 @@ async function createOrUpdateSubscription(
       .from("subscriptions")
       .update({ current_period_end: newEnd.toISOString() })
       .eq("id", existing.id);
+    return newEnd;
   } else {
     // Create new subscription
     await supabaseAdmin.from("subscriptions").insert({
@@ -82,6 +106,7 @@ async function createOrUpdateSubscription(
       current_period_start: now.toISOString(),
       current_period_end: periodEnd.toISOString(),
     });
+    return periodEnd;
   }
 }
 
@@ -121,13 +146,16 @@ export async function POST(req: Request) {
     }).eq("order_no", orderNo);
 
     // Create or extend subscription
-    await createOrUpdateSubscription(order.user_id, order.plan_type);
+    const periodEnd = await createOrUpdateSubscription(order.user_id, order.plan_type);
 
     // Update user profile with tier and appropriate credits
     await supabaseAdmin.from("user_profiles").update({
       subscription_tier: order.plan_type,
       credits_remaining: CREDITS_BY_PLAN[order.plan_type] ?? 9999,
     }).eq("clerk_id", order.user_id);
+
+    // Sync subscription status to Clerk publicMetadata
+    await syncClerkMetadata(order.user_id, order.plan_type, periodEnd);
 
     return new NextResponse(successXml, { headers: { "Content-Type": "application/xml" } });
   } catch (error) {

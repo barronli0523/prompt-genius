@@ -7,7 +7,6 @@ export const categories: Category[] = [
     slug: "writing",
     icon: "✍️",
     description: "文章、故事、文案生成",
-    prompt_count: 24,
   },
   {
     id: "2",
@@ -15,7 +14,6 @@ export const categories: Category[] = [
     slug: "ai-drawing",
     icon: "🎨",
     description: "AI图像生成提示词",
-    prompt_count: 32,
   },
   {
     id: "3",
@@ -23,7 +21,6 @@ export const categories: Category[] = [
     slug: "code-generation",
     icon: "💻",
     description: "编程辅助提示词",
-    prompt_count: 18,
   },
   {
     id: "4",
@@ -31,7 +28,6 @@ export const categories: Category[] = [
     slug: "marketing",
     icon: "📢",
     description: "广告、社交媒体文案",
-    prompt_count: 15,
   },
   {
     id: "5",
@@ -39,7 +35,6 @@ export const categories: Category[] = [
     slug: "video-script",
     icon: "🎬",
     description: "短视频、YouTube脚本",
-    prompt_count: 2,
   },
   {
     id: "6",
@@ -47,7 +42,6 @@ export const categories: Category[] = [
     slug: "business",
     icon: "📊",
     description: "行业分析、竞品研究",
-    prompt_count: 2,
   },
 ];
 

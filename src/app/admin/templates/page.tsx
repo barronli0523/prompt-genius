@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { templates } from "@/data/templates";
-import { Edit, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 
 export default function AdminTemplatesPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);

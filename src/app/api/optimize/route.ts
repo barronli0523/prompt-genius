@@ -12,7 +12,8 @@ const QWEN_MODEL = "qwen3.6-plus";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prompt, target_ai, original_prompt_id } = body;
+    // target_ai is reserved for future AI platform routing
+    const { prompt, original_prompt_id } = body;
 
     if (!prompt || !prompt.trim()) {
       return NextResponse.json(

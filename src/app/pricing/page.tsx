@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { Check, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -41,10 +42,13 @@ const plans = [
 
 export default function PricingPage() {
   const { session } = useSession();
+  const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [payMethod, setPayMethod] = useState<"wechat" | "alipay" | null>(null);
   const [loading, setLoading] = useState(false);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [orderNo, setOrderNo] = useState<string | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const handleSubscribe = (planId: string) => {
     if (planId === "free") {
@@ -72,12 +76,38 @@ export default function PricingPage() {
       const data = await res.json();
       if (data.success && data.qrUrl) {
         setQrUrl(data.qrUrl);
+        setOrderNo(data.data?.orderNo || null);
       }
     } catch (e) {
       console.error("Payment error:", e);
     }
     setLoading(false);
   };
+
+  // Poll for payment completion
+  useEffect(() => {
+    if (!qrUrl || !orderNo || !session?.id) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch("/api/payment/status", {
+          headers: { Authorization: `Bearer ${session.id}` },
+        });
+        const data = await res.json();
+        if (data.success && data.paid) {
+          setPaymentSuccess(true);
+          clearInterval(pollInterval);
+          setTimeout(() => {
+            router.push("/generate");
+          }, 2000);
+        }
+      } catch (e) {
+        console.error("Poll error:", e);
+      }
+    }, 3000);
+
+    return () => clearInterval(pollInterval);
+  }, [qrUrl, orderNo, session, router]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -158,11 +188,20 @@ export default function PricingPage() {
                   支付宝
                 </button>
               </div>
-              {qrUrl ? (
+              {qrUrl ? paymentSuccess ? (
+                <div className="text-center">
+                  <Check className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                  <p className="text-lg font-medium text-green-600">支付成功！</p>
+                  <p className="text-sm text-slate-500 mt-2">正在跳转...</p>
+                </div>
+              ) : (
                 <div className="text-center">
                   <p className="text-sm text-slate-500 mb-4">扫码完成支付</p>
                   <img src={qrUrl} alt="Payment QR" className="w-48 h-48 mx-auto mb-4" />
-                  <p className="text-xs text-slate-400">支付成功后自动跳转</p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    等待支付完成，自动跳转...
+                  </div>
                 </div>
               ) : (
                 <button
