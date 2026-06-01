@@ -287,7 +287,7 @@ export const templates: Template[] = [
       "请创建一个用于生成短视频脚本的 ChatGPT 提示词。视频时长：{duration}，风格：{style}，主题：{topic}，开头钩子：{hook}。输出：一个完整的提示词，包含角色设定、脚本结构要求和输出格式规范。",
     example_output:
       "写一个30秒的口播风格短视频脚本，主题：职场新人避坑指南。开头钩子：90%的人都不知道这3个职场潜规则。包含画面描述、台词、字幕建议。",
-    is_premium: false,
+    is_premium: true,
     usage_count: 2800,
     like_count: 178,
     created_at: "2025-01-15",
@@ -329,7 +329,7 @@ export const templates: Template[] = [
       "请创建一个用于生成 YouTube 视频脚本的 ChatGPT 提示词。视频时长：{length}，主题：{topic}，语气风格：{tone}。输出：一个完整的提示词，包含角色设定、脚本结构（开头钩子/内容主体/结尾CTA）和输出格式要求。",
     example_output:
       "写一个10分钟的YouTube视频脚本，主题：如何用AI提升10倍工作效率，风格：专业教学。包含开头钩子、内容主体、结尾CTA。",
-    is_premium: false,
+    is_premium: true,
     usage_count: 1950,
     like_count: 142,
     created_at: "2025-01-15",
@@ -372,7 +372,7 @@ export const templates: Template[] = [
       "请创建一个用于生成行业分析报告的 ChatGPT 提示词。行业：{industry}，地域范围：{region}，分析深度：{depth}。输出：一个完整的提示词，包含角色设定、报告结构（概况/规模/竞争/趋势/机遇挑战）和输出格式规范。",
     example_output:
       "写一份中国市场新能源汽车行业的行业分析报告，深度：约3000字。包含行业概况、市场规模、竞争格局、发展趋势、关键机遇与挑战。",
-    is_premium: false,
+    is_premium: true,
     usage_count: 1680,
     like_count: 95,
     created_at: "2025-01-20",
@@ -413,7 +413,7 @@ export const templates: Template[] = [
       "请创建一个用于生成竞品分析的 ChatGPT 提示词。我的产品：{my_product}，竞品列表：{competitors}，分析维度：{dimensions}。输出：一个完整的提示词，包含角色设定、分析框架和对比表格输出格式要求。",
     example_output:
       "分析AI写作助手App与Jasper, Copy.ai, Writesonic的对比。分析维度：综合分析。输出包含功能、定价、优劣势、差异化建议的对比表格。",
-    is_premium: false,
+    is_premium: true,
     usage_count: 1420,
     like_count: 87,
     created_at: "2025-01-20",

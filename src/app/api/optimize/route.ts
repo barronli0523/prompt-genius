@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { supabase } from "@/lib/supabase";
+import { checkAndIncrementDailyUsage, deductCredits, DAILY_LIMITS } from "@/services/supabase-service";
 
 export const runtime = "edge";
 
@@ -22,13 +23,29 @@ export async function POST(request: NextRequest) {
 
     // Get user ID if logged in
     const { userId } = await auth();
-    let creditsRemaining = 4;
+    let creditsRemaining = 0;
+    let dailyCount = 0;
+    let dailyLimit = DAILY_LIMITS.free;
+
+    // If logged in, check daily usage limit
+    if (userId) {
+      const usage = await checkAndIncrementDailyUsage(userId);
+      dailyCount = usage.count;
+      dailyLimit = usage.limit;
+      if (!usage.allowed) {
+        return NextResponse.json({
+          error: "今日免费次数已用完，请升级 Pro",
+          credits_remaining: 0,
+          daily_usage_count: usage.count,
+          daily_limit: usage.limit,
+        }, { status: 429 });
+      }
+    }
 
     // If no API key, return basic enhancement
     if (!QWEN_API_KEY) {
       const optimizedPrompt = `[SYSTEM] You are an expert AI assistant.\n\n[CONTEXT] ${prompt}\n\n[INSTRUCTIONS]\n1. Analyze the request carefully\n2. Provide comprehensive and accurate information\n3. Structure your response clearly`;
 
-      // Update original record if user is logged in
       if (userId && original_prompt_id) {
         await supabase
           .from("generated_prompts")
@@ -37,7 +54,6 @@ export async function POST(request: NextRequest) {
           .eq("user_id", userId);
       }
 
-      // Log usage if logged in
       if (userId) {
         await supabase
           .from("usage_logs")
@@ -46,12 +62,20 @@ export async function POST(request: NextRequest) {
             action_type: "optimize",
             credits_used: 1,
           });
+
+        try {
+          creditsRemaining = await deductCredits(userId, 1);
+        } catch {
+          creditsRemaining = 0;
+        }
       }
 
       return NextResponse.json({
         optimized: optimizedPrompt,
         credits_used: 1,
         credits_remaining: creditsRemaining,
+        daily_usage_count: dailyCount,
+        daily_limit: dailyLimit,
         source: "template",
       });
     }
@@ -90,7 +114,6 @@ Rules:
     const data = await response.json();
     const optimizedPrompt = data.choices[0]?.message?.content || prompt;
 
-    // Update original record if user is logged in
     if (userId && original_prompt_id) {
       await supabase
         .from("generated_prompts")
@@ -99,7 +122,6 @@ Rules:
         .eq("user_id", userId);
     }
 
-    // Log usage if logged in
     if (userId) {
       await supabase
         .from("usage_logs")
@@ -109,20 +131,19 @@ Rules:
           credits_used: 1,
         });
 
-      // Get remaining credits
-      const { data: profileData } = await supabase
-        .from("user_profiles")
-        .select("credits_remaining")
-        .eq("clerk_id", userId)
-        .single();
-
-      creditsRemaining = profileData?.credits_remaining || 4;
+      try {
+        creditsRemaining = await deductCredits(userId, 1);
+      } catch {
+        creditsRemaining = 0;
+      }
     }
 
     return NextResponse.json({
       optimized: optimizedPrompt,
       credits_used: 1,
       credits_remaining: creditsRemaining,
+      daily_usage_count: dailyCount,
+      daily_limit: dailyLimit,
       source: "qwen",
     });
   } catch (error) {

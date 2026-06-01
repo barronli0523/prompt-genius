@@ -2,17 +2,29 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import ClientHeader from "@/components/ClientHeader";
 import Footer from "@/components/Footer";
 import TemplateCard from "@/components/TemplateCard";
 import { templates, categories } from "@/data/templates";
 
 export default function TemplatesPage() {
+  const { user } = useUser();
   const [activeCategory, setActiveCategory] = useState("all");
-  const [isClient, setIsClient] = useState(false);
+  const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    // Check subscription status from Clerk publicMetadata
+    if (user) {
+      const metadata = user.publicMetadata as Record<string, unknown>;
+      const tier = (metadata?.subscription_tier as string) || "free";
+      setIsPro(tier === "pro" || tier === "annual");
+    } else {
+      setIsPro(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const categoryId = params.get("category");
     if (categoryId) {
@@ -79,7 +91,7 @@ export default function TemplatesPage() {
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredTemplates.map((template) => (
-                <TemplateCard key={template.id} template={template} />
+                <TemplateCard key={template.id} template={template} isPro={isPro} />
               ))}
             </div>
           ) : (

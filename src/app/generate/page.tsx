@@ -1,17 +1,32 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import ClientHeader from "@/components/ClientHeader";
 import Footer from "@/components/Footer";
 import PromptGenerator from "@/components/PromptGenerator";
 import { templates, categories } from "@/data/templates";
+import { Lock } from "lucide-react";
 
 function GenerateContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { user } = useUser();
   const categoryId = searchParams.get("category");
   const [filterCategory, setFilterCategory] = useState(categoryId || "all");
+  const [isPro, setIsPro] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      const metadata = user.publicMetadata as Record<string, unknown>;
+      const tier = (metadata?.subscription_tier as string) || "free";
+      setIsPro(tier === "pro" || tier === "annual");
+    } else {
+      setIsPro(false);
+    }
+  }, [user]);
 
   const filteredTemplates =
     filterCategory === "all"
@@ -25,6 +40,14 @@ function GenerateContent() {
   useEffect(() => {
     setSelectedTemplate(filteredTemplates[0] || null);
   }, [filterCategory]);
+
+  const handleTemplateClick = (template: typeof templates[0]) => {
+    if (template.is_premium && !isPro) {
+      router.push("/pricing");
+      return;
+    }
+    setSelectedTemplate(template);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -74,22 +97,33 @@ function GenerateContent() {
 
               {/* Template List */}
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                {filteredTemplates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => setSelectedTemplate(template)}
-                    className={`w-full text-left p-3 rounded-lg border transition ${
-                      selectedTemplate?.id === template.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border bg-white hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="font-medium text-sm">{template.name}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {template.target_ai === "midjourney" ? "AI绘图" : template.target_ai === "chatgpt" ? "ChatGPT" : template.target_ai} · {template.usage_count} 次使用
-                    </div>
-                  </button>
-                ))}
+                {filteredTemplates.map((template) => {
+                  const isLocked = template.is_premium && !isPro;
+                  return (
+                    <button
+                      key={template.id}
+                      onClick={() => handleTemplateClick(template)}
+                      className={`w-full text-left p-3 rounded-lg border transition relative ${
+                        selectedTemplate?.id === template.id
+                          ? "border-primary bg-primary/5"
+                          : isLocked
+                          ? "border-border bg-slate-50 opacity-60"
+                          : "border-border bg-white hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-sm">{template.name}</div>
+                        {isLocked && <Lock className="w-3 h-3 text-slate-400 flex-shrink-0" />}
+                        {template.is_premium && !isLocked && (
+                          <span className="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded">PRO</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {template.target_ai === "midjourney" ? "AI绘图" : template.target_ai === "chatgpt" ? "ChatGPT" : template.target_ai} · {template.usage_count} 次使用
+                      </div>
+                    </button>
+                  );
+                })}
                 {filteredTemplates.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-8">该分类下暂无模板</p>
                 )}

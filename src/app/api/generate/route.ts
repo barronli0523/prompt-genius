@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { supabase } from "@/lib/supabase";
+import { templates } from "@/data/templates";
+import { checkAndIncrementDailyUsage, getActiveSubscription, deductCredits, DAILY_LIMITS } from "@/services/supabase-service";
 
 export const runtime = "edge";
 
@@ -33,7 +35,38 @@ export async function POST(request: NextRequest) {
 
     // Get user ID if logged in
     const { userId } = await auth();
-    let creditsRemaining = 4;
+    let creditsRemaining = 0;
+    let dailyCount = 0;
+    let dailyLimit = DAILY_LIMITS.free;
+
+    // If logged in, check daily usage limit
+    if (userId) {
+      const usage = await checkAndIncrementDailyUsage(userId);
+      dailyCount = usage.count;
+      dailyLimit = usage.limit;
+      if (!usage.allowed) {
+        return NextResponse.json({
+          error: "今日免费次数已用完，请升级 Pro",
+          credits_remaining: 0,
+          daily_usage_count: usage.count,
+          daily_limit: usage.limit,
+        }, { status: 429 });
+      }
+
+      // Check premium template access
+      if (template_id && template_id !== "unknown") {
+        const tmpl = templates.find((t) => t.id === template_id);
+        if (tmpl?.is_premium) {
+          const sub = await getActiveSubscription(userId);
+          if (sub.tier === "free") {
+            return NextResponse.json({
+              error: "该模板需要 Pro 或年度订阅",
+              credits_remaining: 0,
+            }, { status: 403 });
+          }
+        }
+      }
+    }
 
     // If no API key, return template-based result
     if (!QWEN_API_KEY) {
@@ -57,12 +90,21 @@ export async function POST(request: NextRequest) {
             action_type: "generate",
             credits_used: 1,
           });
+
+        // Deduct credits
+        try {
+          creditsRemaining = await deductCredits(userId, 1);
+        } catch {
+          creditsRemaining = 0;
+        }
       }
 
       return NextResponse.json({
         prompt: finalPrompt,
         credits_used: 1,
         credits_remaining: creditsRemaining,
+        daily_usage_count: dailyCount,
+        daily_limit: dailyLimit,
         source: "template",
       });
     }
@@ -114,20 +156,20 @@ export async function POST(request: NextRequest) {
           credits_used: 1,
         });
 
-      // Get remaining credits
-      const { data: profileData } = await supabase
-        .from("user_profiles")
-        .select("credits_remaining")
-        .eq("clerk_id", userId)
-        .single();
-
-      creditsRemaining = profileData?.credits_remaining || 4;
+      // Deduct credits
+      try {
+        creditsRemaining = await deductCredits(userId, 1);
+      } catch {
+        creditsRemaining = 0;
+      }
     }
 
     return NextResponse.json({
       prompt: enhancedPrompt,
       credits_used: 1,
       credits_remaining: creditsRemaining,
+      daily_usage_count: dailyCount,
+      daily_limit: dailyLimit,
       source: "qwen",
     });
   } catch (error) {
