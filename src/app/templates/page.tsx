@@ -2,27 +2,26 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import ClientHeader from "@/components/ClientHeader";
 import Footer from "@/components/Footer";
 import TemplateCard from "@/components/TemplateCard";
 import { templates, categories } from "@/data/templates";
 
 export default function TemplatesPage() {
-  const { user } = useUser();
+  const { user, isLoading } = useAuth();
   const [activeCategory, setActiveCategory] = useState("all");
   const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
-    // Check subscription status from Clerk publicMetadata
-    if (user) {
-      const metadata = user.publicMetadata as Record<string, unknown>;
-      const tier = (metadata?.subscription_tier as string) || "free";
+    if (!isLoading && user) {
+      // Read subscription tier from user metadata (set by Clerk/supabase)
+      const tier = (user.user_metadata as Record<string, unknown>)?.subscription_tier as string;
       setIsPro(tier === "pro" || tier === "annual");
     } else {
       setIsPro(false);
     }
-  }, [user]);
+  }, [user, isLoading]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -41,13 +40,14 @@ export default function TemplatesPage() {
     setActiveCategory(catId);
   };
 
+  if (isLoading) return null;
+
   return (
     <div className="min-h-screen flex flex-col">
       <ClientHeader />
 
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
-          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
             <Link href="/" className="hover:text-primary">首页</Link>
             <span>/</span>
@@ -59,7 +59,6 @@ export default function TemplatesPage() {
             共 {filteredTemplates.length} 个专业模板
           </p>
 
-          {/* Category Filter Buttons */}
           <div className="flex flex-wrap gap-3 mb-8 pb-6 border-b border-border">
             <button
               onClick={() => handleCategoryClick("all")}
@@ -87,7 +86,6 @@ export default function TemplatesPage() {
             ))}
           </div>
 
-          {/* Templates Grid */}
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredTemplates.map((template) => (

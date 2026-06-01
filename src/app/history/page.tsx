@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { Copy, Trash2, Star, StarOff } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import ClientHeader from "@/components/ClientHeader";
 
 interface GeneratedPrompt {
@@ -20,13 +20,13 @@ interface GeneratedPrompt {
 }
 
 export default function HistoryPage() {
-  const { user, isLoaded } = useUser();
+  const { user, isSignedIn, isLoading } = useAuth();
   const [prompts, setPrompts] = useState<GeneratedPrompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoaded || !user) return;
+    if (!isSignedIn || !user) return;
 
     async function fetchHistory() {
       const { data, error } = await supabase
@@ -46,7 +46,7 @@ export default function HistoryPage() {
     }
 
     fetchHistory();
-  }, [isLoaded, user?.id]);
+  }, [isSignedIn, user?.id]);
 
   const handleCopy = async (prompt: GeneratedPrompt, id: string) => {
     const textToCopy = prompt.optimized_prompt || prompt.generated_prompt;
@@ -89,7 +89,7 @@ export default function HistoryPage() {
     setPrompts((prev) => prev.filter((p) => p.id !== id));
   };
 
-  if (!isLoaded || loading) {
+  if (isLoading || loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
@@ -100,7 +100,7 @@ export default function HistoryPage() {
     );
   }
 
-  if (!user) {
+  if (!isSignedIn || !user) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">

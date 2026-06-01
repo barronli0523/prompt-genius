@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { createServerClient } from "@supabase/ssr";
 import { supabase } from "@/lib/supabase";
 import { templates } from "@/data/templates";
 import { checkAndIncrementDailyUsage, getActiveSubscription, deductCredits, DAILY_LIMITS } from "@/services/supabase-service";
@@ -9,11 +9,12 @@ export const runtime = "edge";
 const QWEN_API_KEY = process.env.OPENAI_API_KEY || "";
 const QWEN_API_URL = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1";
 const QWEN_MODEL = "qwen3.6-plus";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    // target_ai is reserved for future AI platform routing
     const { system_prompt, user_prompt_template, form_values, template_id, template_name } = body;
 
     if (!system_prompt || !user_prompt_template) {
@@ -23,19 +24,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build the final user prompt by replacing placeholders
-    let finalPrompt = user_prompt_template;
-    if (form_values) {
-      Object.entries(form_values).forEach(([key, value]) => {
-        finalPrompt = finalPrompt.replace(
-          new RegExp(`{${key}}`, "g"),
-          String(value || "")
-        );
-      });
-    }
+    // Get user from Supabase auth cookies
+    const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {
+          // Edge routes can't set cookies directly, but middleware handles this
+        },
+      },
+    });
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userId = user?.id || null;
 
-    // Get user ID if logged in
-    const { userId } = await auth();
     let creditsRemaining = 0;
     let dailyCount = 0;
     let dailyLimit = DAILY_LIMITS.free;
@@ -69,30 +71,34 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Build the final user prompt
+    let finalPrompt = user_prompt_template;
+    if (form_values) {
+      Object.entries(form_values).forEach(([key, value]) => {
+        finalPrompt = finalPrompt.replace(
+          new RegExp(`{${key}}`, "g"),
+          String(value || "")
+        );
+      });
+    }
+
     // If no API key, return template-based result
     if (!QWEN_API_KEY) {
-      // Save to database if user is logged in
       if (userId) {
-        await supabase
-          .from("generated_prompts")
-          .insert({
-            user_id: userId,
-            template_id: template_id || "unknown",
-            template_name: template_name || null,
-            input_params: form_values || {},
-            generated_prompt: finalPrompt,
-          });
+        await supabase.from("generated_prompts").insert({
+          user_id: userId,
+          template_id: template_id || "unknown",
+          template_name: template_name || null,
+          input_params: form_values || {},
+          generated_prompt: finalPrompt,
+        });
 
-        // Log usage
-        await supabase
-          .from("usage_logs")
-          .insert({
-            user_id: userId,
-            action_type: "generate",
-            credits_used: 1,
-          });
+        await supabase.from("usage_logs").insert({
+          user_id: userId,
+          action_type: "generate",
+          credits_used: 1,
+        });
 
-        // Deduct credits
         try {
           creditsRemaining = await deductCredits(userId, 1);
         } catch {
@@ -110,7 +116,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Call Qwen API to enhance the prompt
+    // Call Qwen API
     const response = await fetch(`${QWEN_API_URL}/chat/completions`, {
       method: "POST",
       headers: {
@@ -136,28 +142,21 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     const enhancedPrompt = data.choices[0]?.message?.content || finalPrompt;
 
-    // Save to database if user is logged in
     if (userId) {
-      await supabase
-        .from("generated_prompts")
-        .insert({
-          user_id: userId,
-          template_id: template_id || "unknown",
-          template_name: template_name || null,
-          input_params: form_values || {},
-          generated_prompt: enhancedPrompt,
-        });
+      await supabase.from("generated_prompts").insert({
+        user_id: userId,
+        template_id: template_id || "unknown",
+        template_name: template_name || null,
+        input_params: form_values || {},
+        generated_prompt: enhancedPrompt,
+      });
 
-      // Log usage
-      await supabase
-        .from("usage_logs")
-        .insert({
-          user_id: userId,
-          action_type: "generate",
-          credits_used: 1,
-        });
+      await supabase.from("usage_logs").insert({
+        user_id: userId,
+        action_type: "generate",
+        credits_used: 1,
+      });
 
-      // Deduct credits
       try {
         creditsRemaining = await deductCredits(userId, 1);
       } catch {

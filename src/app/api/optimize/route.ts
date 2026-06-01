@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { createServerClient } from "@supabase/ssr";
 import { supabase } from "@/lib/supabase";
 import { checkAndIncrementDailyUsage, deductCredits, DAILY_LIMITS } from "@/services/supabase-service";
 
@@ -8,11 +8,12 @@ export const runtime = "edge";
 const QWEN_API_KEY = process.env.OPENAI_API_KEY || "";
 const QWEN_API_URL = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1";
 const QWEN_MODEL = "qwen3.6-plus";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    // target_ai is reserved for future AI platform routing
     const { prompt, original_prompt_id } = body;
 
     if (!prompt || !prompt.trim()) {
@@ -22,8 +23,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user ID if logged in
-    const { userId } = await auth();
+    // Get user from Supabase auth cookies
+    const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {},
+      },
+    });
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userId = user?.id || null;
+
     let creditsRemaining = 0;
     let dailyCount = 0;
     let dailyLimit = DAILY_LIMITS.free;

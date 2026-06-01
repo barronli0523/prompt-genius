@@ -10,7 +10,9 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.4.1",
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.3.0",

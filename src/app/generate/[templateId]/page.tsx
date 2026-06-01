@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { createServerClient } from "@/lib/auth-server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PromptGenerator from "@/components/PromptGenerator";
@@ -21,14 +21,16 @@ export default async function TemplateDetailPage({ params }: Props) {
 
   // Premium template gate
   if (template.is_premium) {
-    const { userId } = await auth();
-    if (userId) {
-      const sub = await getActiveSubscription(userId);
+    const supabase = createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      const sub = await getActiveSubscription(user.id);
       if (sub.tier === "free") {
         redirect("/pricing");
       }
     } else {
-      redirect("/pricing");
+      redirect("/login?redirect_url=/generate/" + resolvedParams.templateId);
     }
   }
 

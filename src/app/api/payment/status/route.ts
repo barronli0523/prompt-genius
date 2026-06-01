@@ -1,21 +1,30 @@
 export const runtime = "edge";
 
+import { createServerClient } from "@supabase/ssr";
 import { supabaseAdmin } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import { clerkClient } from "@clerk/nextjs/server";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function GET(req: Request) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
+    // Get user from Supabase auth cookies
+    const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return req.headers.get("cookie")?.split(";").map(c => {
+            const [name, value] = c.trim().split("=");
+            return { name, value };
+          }) || [];
+        },
+        setAll() {},
+      },
+    });
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userId = user?.id;
 
-    const client = await clerkClient();
-    const session = await client.sessions.getSession(authHeader.replace("Bearer ", ""));
-    const clerkId = session?.userId;
-
-    if (!clerkId) {
+    if (!userId) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,7 +32,7 @@ export async function GET(req: Request) {
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select("*")
-      .eq("user_id", clerkId)
+      .eq("user_id", userId)
       .eq("pay_status", "paid")
       .order("created_at", { ascending: false })
       .limit(1)

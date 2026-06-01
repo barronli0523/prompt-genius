@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Check, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -41,7 +41,7 @@ const plans = [
 ];
 
 export default function PricingPage() {
-  const { session } = useSession();
+  const { user, isSignedIn, isLoading } = useAuth();
   const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [payMethod, setPayMethod] = useState<"wechat" | "alipay" | null>(null);
@@ -55,6 +55,10 @@ export default function PricingPage() {
       window.location.href = "/generate";
       return;
     }
+    if (!isSignedIn) {
+      router.push(`/login?redirect_url=/pricing`);
+      return;
+    }
     setSelectedPlan(planId);
     setPayMethod(null);
     setQrUrl(null);
@@ -64,13 +68,10 @@ export default function PricingPage() {
     if (!selectedPlan || !payMethod) return;
     setLoading(true);
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (session?.id) {
-        headers["Authorization"] = `Bearer ${session.id}`;
-      }
       const res = await fetch("/api/payment/create", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ planType: selectedPlan, payMethod }),
       });
       const data = await res.json();
@@ -86,12 +87,12 @@ export default function PricingPage() {
 
   // Poll for payment completion
   useEffect(() => {
-    if (!qrUrl || !orderNo || !session?.id) return;
+    if (!qrUrl || !orderNo || !user) return;
 
     const pollInterval = setInterval(async () => {
       try {
         const res = await fetch("/api/payment/status", {
-          headers: { Authorization: `Bearer ${session.id}` },
+          credentials: "include",
         });
         const data = await res.json();
         if (data.success && data.paid) {
@@ -107,7 +108,9 @@ export default function PricingPage() {
     }, 3000);
 
     return () => clearInterval(pollInterval);
-  }, [qrUrl, orderNo, session, router]);
+  }, [qrUrl, orderNo, user, router]);
+
+  if (isLoading) return null;
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import ClientHeader from "@/components/ClientHeader";
 import Footer from "@/components/Footer";
 import PromptGenerator from "@/components/PromptGenerator";
@@ -13,15 +13,14 @@ import { Lock } from "lucide-react";
 function GenerateContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
   const categoryId = searchParams.get("category");
   const [filterCategory, setFilterCategory] = useState(categoryId || "all");
   const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
     if (user) {
-      const metadata = user.publicMetadata as Record<string, unknown>;
-      const tier = (metadata?.subscription_tier as string) || "free";
+      const tier = (user.user_metadata as Record<string, unknown>)?.subscription_tier as string;
       setIsPro(tier === "pro" || tier === "annual");
     } else {
       setIsPro(false);
@@ -55,14 +54,12 @@ function GenerateContent() {
 
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
-          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link href="/" className="hover:text-primary">首页</Link>
             <span>/</span>
             <span className="text-foreground">生成提示词</span>
           </div>
 
-          {/* Category Tabs */}
           <div className="flex flex-wrap gap-3 mb-6 pb-6 border-b border-border">
             <button
               onClick={() => setFilterCategory("all")}
@@ -91,11 +88,9 @@ function GenerateContent() {
           </div>
 
           <div className="grid lg:grid-cols-4 gap-6">
-            {/* Sidebar - Template List */}
             <div className="lg:col-span-1">
               <h2 className="font-bold text-lg mb-4">选择模板</h2>
 
-              {/* Template List */}
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {filteredTemplates.map((template) => {
                   const isLocked = template.is_premium && !isPro;
@@ -130,7 +125,6 @@ function GenerateContent() {
               </div>
             </div>
 
-            {/* Main - Generator */}
             <div className="lg:col-span-3">
               {selectedTemplate ? (
                 <PromptGenerator template={selectedTemplate} />

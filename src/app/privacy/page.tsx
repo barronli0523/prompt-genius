@@ -17,7 +17,7 @@ export default function PrivacyPage() {
                 我们仅收集提供服务所必需的信息：
               </p>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>通过 Clerk 认证收集的基础账户信息（邮箱、用户名）</li>
+                <li>通过邮箱注册认证收集的基础账户信息（邮箱、用户名）</li>
                 <li>生成的提示词记录（存储在 Supabase 数据库中）</li>
                 <li>使用日志（生成次数、时间戳）</li>
               </ul>

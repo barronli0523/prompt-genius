@@ -1,10 +1,12 @@
 export const runtime = "edge";
 
+import { createServerClient } from "@supabase/ssr";
 import { supabaseAdmin } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import { clerkClient } from "@clerk/nextjs/server";
 
 const PRICING = { pro: 3000, annual: 30000 };
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function POST(req: Request) {
   try {
@@ -16,17 +18,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Invalid plan" }, { status: 400 });
     }
 
-    const authHeader = req.headers.get("authorization");
-    let clerkId = null;
-    if (authHeader) {
-      try {
-        const client = await clerkClient();
-        const session = await client.sessions.getSession(authHeader.replace("Bearer ", ""));
-        clerkId = session?.userId;
-      } catch {}
-    }
+    // Get user from Supabase auth cookies
+    const supabaseClient = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return req.headers.get("cookie")?.split(";").map(c => {
+            const [name, value] = c.trim().split("=");
+            return { name, value };
+          }) || [];
+        },
+        setAll() {},
+      },
+    });
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userId = user?.id;
 
-    if (!clerkId) {
+    if (!userId) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
@@ -35,7 +42,7 @@ export async function POST(req: Request) {
     const { data: order, error } = await supabaseAdmin
       .from("orders")
       .insert({
-        user_id: clerkId,
+        user_id: userId,
         order_no: orderNo,
         plan_type: planType,
         amount: PRICING[planType as keyof typeof PRICING],

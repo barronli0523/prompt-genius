@@ -37,25 +37,25 @@ export interface GeneratedPrompt {
   created_at: string
 }
 
-export async function getUserProfile(clerkId: string): Promise<UserProfile | null> {
+export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
-    .eq('clerk_id', clerkId)
+    .eq('clerk_id', userId)
     .single()
 
   if (error) return null
   return data
 }
 
-export async function createOrUpdateUserProfile(clerkId: string, profile: Partial<UserProfile>): Promise<UserProfile> {
+export async function createOrUpdateUserProfile(userId: string, profile: Partial<UserProfile>): Promise<UserProfile> {
   const { data, error } = await supabase
     .from('user_profiles')
     .upsert({
-      clerk_id: clerkId,
+      clerk_id: userId,
       ...profile,
     })
-    .eq('clerk_id', clerkId)
+    .eq('clerk_id', userId)
     .select()
     .single()
 
@@ -124,11 +124,11 @@ export async function getFavoritePrompts(userId: string): Promise<GeneratedPromp
   return data || []
 }
 
-export async function deductCredits(clerkId: string, amount = 1): Promise<number> {
+export async function deductCredits(userId: string, amount = 1): Promise<number> {
   const { data: profile, error: fetchError } = await supabase
     .from('user_profiles')
     .select('credits_remaining')
-    .eq('clerk_id', clerkId)
+    .eq('clerk_id', userId)
     .single()
 
   if (fetchError || !profile) throw fetchError || new Error('Profile not found')
@@ -138,7 +138,7 @@ export async function deductCredits(clerkId: string, amount = 1): Promise<number
   const { data, error } = await supabase
     .from('user_profiles')
     .update({ credits_remaining: newCredits })
-    .eq('clerk_id', clerkId)
+    .eq('clerk_id', userId)
     .select('credits_remaining')
     .single()
 
@@ -150,7 +150,7 @@ export async function deductCredits(clerkId: string, amount = 1): Promise<number
  * Check daily usage limit and increment counter atomically.
  * Returns { allowed: true, count, limit } or { allowed: false, count, limit }.
  */
-export async function checkAndIncrementDailyUsage(clerkId: string): Promise<{
+export async function checkAndIncrementDailyUsage(userId: string): Promise<{
   allowed: boolean
   count: number
   limit: number
@@ -159,7 +159,7 @@ export async function checkAndIncrementDailyUsage(clerkId: string): Promise<{
   const { data: profile, error } = await supabase
     .from('user_profiles')
     .select('daily_usage_count, last_usage_date, subscription_tier')
-    .eq('clerk_id', clerkId)
+    .eq('clerk_id', userId)
     .single()
 
   if (error || !profile) {
@@ -189,7 +189,7 @@ export async function checkAndIncrementDailyUsage(clerkId: string): Promise<{
       daily_usage_count: newCount,
       last_usage_date: today,
     })
-    .eq('clerk_id', clerkId)
+    .eq('clerk_id', userId)
 
   return { allowed: true, count: newCount, limit }
 }
@@ -199,11 +199,11 @@ export async function checkAndIncrementDailyUsage(clerkId: string): Promise<{
  * Returns the tier and expiry date, or 'free' if none.
  * Auto-expires any past-due subscription records.
  */
-export async function getActiveSubscription(clerkId: string): Promise<ActiveSubscription> {
+export async function getActiveSubscription(userId: string): Promise<ActiveSubscription> {
   const { data: subs, error } = await supabase
     .from('subscriptions')
     .select('*')
-    .eq('user_id', clerkId)
+    .eq('user_id', userId)
     .eq('status', 'active')
     .order('current_period_end', { ascending: false })
     .limit(1)
@@ -225,7 +225,7 @@ export async function getActiveSubscription(clerkId: string): Promise<ActiveSubs
     await supabase
       .from('user_profiles')
       .update({ subscription_tier: 'free' })
-      .eq('clerk_id', clerkId)
+      .eq('clerk_id', userId)
     return { tier: 'free', expiry: null }
   }
 
