@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "@clerk/nextjs";
 import { Check, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -39,6 +40,7 @@ const plans = [
 ];
 
 export default function PricingPage() {
+  const { session } = useSession();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [payMethod, setPayMethod] = useState<"wechat" | "alipay" | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,9 +60,13 @@ export default function PricingPage() {
     if (!selectedPlan || !payMethod) return;
     setLoading(true);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (session?.id) {
+        headers["Authorization"] = `Bearer ${session.id}`;
+      }
       const res = await fetch("/api/payment/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ planType: selectedPlan, payMethod }),
       });
       const data = await res.json();

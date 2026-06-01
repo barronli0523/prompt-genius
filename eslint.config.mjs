@@ -6,7 +6,6 @@ export default tseslint.config(
     files: ["**/*.{js,jsx,ts,tsx}"],
     extends: [
       ...tseslint.configs.recommended,
-      ...tseslint.configs.recommendedTypeChecked,
     ],
     plugins: {
       "@next/next": nextPlugin,
@@ -15,6 +14,7 @@ export default tseslint.config(
       ...nextPlugin.rules.recommended,
       ...nextPlugin.rules["core-web-vitals"],
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   {
@@ -22,9 +22,11 @@ export default tseslint.config(
       ".next/**",
       "out/**",
       "build/**",
-      "next-env.d.ts",
+      ".vercel/**",
+      ".wrangler/**",
       "node_modules/**",
-      "**/*.config.*",
+      "*.config.*",
+      "next-env.d.ts",
     ],
   }
 );

@@ -102,6 +102,8 @@ export default function PromptGenerator({ template }: PromptGeneratorProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          template_id: template.id,
+          template_name: template.name,
           system_prompt: template.system_prompt,
           user_prompt_template: template.user_prompt_template,
           form_values: formValues,

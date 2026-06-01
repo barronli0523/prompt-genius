@@ -112,11 +112,21 @@ export async function getFavoritePrompts(userId: string): Promise<GeneratedPromp
 }
 
 export async function deductCredits(userId: string, amount = 1): Promise<number> {
+  // Fetch current credits
+  const { data: profile, error: fetchError } = await supabase
+    .from('user_profiles')
+    .select('credits_remaining')
+    .eq('id', userId)
+    .single()
+
+  if (fetchError || !profile) throw fetchError || new Error('Profile not found')
+
+  const newCredits = Math.max(0, profile.credits_remaining - amount)
+
+  // Update credits
   const { data, error } = await supabase
     .from('user_profiles')
-    .update({
-      credits_remaining: supabase.rpc('decrement_credits', { amount }),
-    })
+    .update({ credits_remaining: newCredits })
     .eq('id', userId)
     .select('credits_remaining')
     .single()
